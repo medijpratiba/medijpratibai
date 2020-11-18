@@ -1,0 +1,119 @@
+# Copyright (C) 2020 by the contributors
+# This file is distributed under the same license as the WordPress package.
+msgid ""
+msgstr ""
+"Project-Id-Version: Medijpratiba.lv Jautā\n"
+"Report-Msgid-Bugs-To: https://core.trac.wordpress.org/\n"
+"Last-Translator: Rolands Umbrovskis <tech@medijpratiba.lv>\n"
+"Language-Team: Latvian <tech@medijpratiba.lv>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2020-11-16 00:45+0200\n"
+"PO-Revision-Date: 2020-11-16 01:14+0200\n"
+"X-Generator: Poedit 2.4.2\n"
+"Plural-Forms: nplurals=3; plural=(n%10==0 || (n%100>=11 && n%100<=19) ? 0 : n%10==1 && n%100!=11 ? 1 : 2);\n"
+"Language: lv\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+
+msgid "Questions"
+msgstr "Jautājumi"
+
+msgid "Question"
+msgstr "Jautājums"
+
+msgid "Add new"
+msgstr "Pievienot jaunu"
+
+msgid "Add new Question"
+msgstr "Pievienot jaunu jautājumu"
+
+msgid "Edit"
+msgstr "Labot"
+
+msgid "Edit Question"
+msgstr "Labot jautājumu"
+
+msgid "New Question"
+msgstr "Jauns jautājums"
+
+msgid "View"
+msgstr "Skatīt"
+
+msgid "View Question"
+msgstr "Skatīt jautājumu"
+
+msgid "Search Questions"
+msgstr "Meklēt jautājumos"
+
+msgid "Questions not found"
+msgstr "Jautājums nav atrasts"
+
+msgid "Questions not found in trash"
+msgstr "Jautājumi nav atrasti miskastē"
+
+msgid "Parent Questions"
+msgstr "Galvenais jautājums"
+
+msgid "Questions categories"
+msgstr "Jautājumu kategorijas"
+
+msgid "Questions category"
+msgstr "Jautājumu kategorija"
+
+msgid "Nr"
+msgstr "Nr"
+
+msgid "Step"
+msgstr "Solis"
+
+msgid "Answer"
+msgstr "Atbilde"
+
+msgid "Answers"
+msgstr "Atbildes"
+
+msgid "INCORRECT answers"
+msgstr "NEPAREIZĀS atbildes"
+
+msgid "Explanation"
+msgstr "Paskaidrojums"
+
+msgid "1 ... 23"
+msgstr "1 ... 23"
+
+msgid "Continue reading %s"
+msgstr "Turpini skatīt %s"
+
+msgid "Pages:"
+msgstr "Lapas:"
+
+msgid "Points"
+msgstr "Punkti"
+
+msgid "Search"
+msgstr "Meklēt"
+
+msgid "Roll"
+msgstr "Mest"
+
+msgid "Close"
+msgstr "Aizvērt"
+
+msgid "Continue"
+msgstr "turpināt"
+
+msgid "Start"
+msgstr "Starts"
+
+msgid "Finish"
+msgstr "Finišs"
+
+msgid "Restart game"
+msgstr "No jauna"
+
+msgid "Nothing Found"
+msgstr "Neko neatrada"
+
+msgid "It seems we can&rsquo;t find what you&rsquo;re looking for. Perhaps searching can help."
+msgstr "Neatradām to, ko vaicāji. Varbūt meklētājs var palīdzēt."

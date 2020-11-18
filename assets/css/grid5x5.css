@@ -1,0 +1,87 @@
+html,
+body {
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.grid5x5_container {
+  font-size: 16px;
+}
+
+.h100m{
+    max-height: 100vh!important;
+}
+
+.neredz {
+  display: none !important;
+}
+
+.text-shadow1 {
+  text-shadow: 2px 2px 5px #000;
+}
+
+html > .page-template-tpl_5x5 {
+  background: url(../img/conor-samuel-circus-3000.jpg) no-repeat left bottom
+    fixed;
+  background-size: cover;
+  height: 100%;
+  background-color: #000;
+  color: #fff;
+}
+
+.grid5x5-single {
+  background-color: rgba(172, 72, 0, 0.9);
+  color: #fff;
+  border-radius: 5px;
+  text-align: center;
+  display: table;
+}
+
+.grid5x5-single:nth-child(even) {
+  background-color: rgba(109, 36, 0, 0.9);
+}
+
+.grid5x5-single:first-child {
+  background: rgb(53, 2, 2) url('../img/zhuo-cheng-you-dice-300.jpg') no-repeat
+    bottom right;
+  color: #fff;
+  background-size: cover;
+}
+
+.grid5x5-single:last-child {
+  background: rgb(2, 34, 7) url('../img/david-boca-sparks-300.jpg') no-repeat
+    top center;
+  background-size: cover;
+  color: #fff;
+}
+
+.grid5x5 {
+  width: 90%;
+  width: calc(100% - 16px);
+  display: grid;
+  grid-gap: 4px;
+  grid-template-columns: repeat(5, 20%);
+  position: relative;
+}
+
+.grid5x5-single .grid5x5-box {
+  transform: translate(-50%, -50%);
+  -moz-transform: translate(-50%, 0);
+  /* Firefox */
+  top: 50%;
+  left: 50%;
+  position: relative;
+  height: 15vh;
+  width: 10vw;
+  display: table-cell;
+  vertical-align: middle;
+}
+
+#empModal .modal-content {
+  background-color: #260101;
+  color: #fff;
+}
+
+#dice {
+  line-height: 0.5rem;
+}
