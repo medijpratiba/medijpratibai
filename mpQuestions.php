@@ -3,7 +3,7 @@
 /** 
  * Plugin Name: Medijpratiba.lv jautājumi
  * Version: 1.1.0
- * Plugin URI: https://mediabox.lv/wordpress/
+ * Plugin URI: https://medijpratiba.lv/spele/
  * Description: Medijpratiba.lv spēles jautājumi
  * Author: Rolands Umbrovskis
  * Author URI: https://umbrovskis.com

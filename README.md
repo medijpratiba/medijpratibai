@@ -4,4 +4,4 @@
 
 WordPress spraudņa pamats, lai varētu izmantot medijpratiba.lv spēles jautājumus savā WordPress mājas lapā.
 
-Instalēšanas iznstrukcijas: [Medijpratība jautā](https://github.com/republa/medijpratiba_jauta) repozitorijā
+Instalēšanas iznstrukcijas: [Medijpratība jautā](https://github.com/medijpratiba/medijpratiba_jauta) repozitorijā
