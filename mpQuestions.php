@@ -2,8 +2,8 @@
 
 /** 
  * Plugin Name: Medijpratiba.lv jautājumi
- * Version: 1.0.0
- * Plugin URI: https://mediabox.lv/wordpress/
+ * Version: 1.1.0
+ * Plugin URI: https://medijpratiba.lv/spele/
  * Description: Medijpratiba.lv spēles jautājumi
  * Author: Rolands Umbrovskis
  * Author URI: https://umbrovskis.com
@@ -12,6 +12,10 @@
  * License: GNU General Public License
  * 
  */
+
+if( ! defined( 'ABSPATH') ) {
+    exit;
+}
 
 require_once __DIR__ . '/PageTemplater.php';
 
@@ -36,8 +40,8 @@ require_once __DIR__ . '/helpers.php';
 class mpQuestions
 {
 
-    var $vers = '1.0.0';
-    var $verspatch; // patch version 
+    var $vers = '1.1.0';
+    var $versbuild; // build version 
     var $plugin_slug;
     var $label_singular;
     var $label_plural;
@@ -54,7 +58,7 @@ class mpQuestions
         $this->plugin_td = 'medijpratibalv';
         $this->plugin_slug = 'mpquestions';
 
-        $this->verspatch = $this->versionPatch();
+        $this->versbuild = $this->versionPatch();
 
         $this->label_plural = __('Questions', $this->plugin_td);
         $this->label_singular = __('Question', $this->plugin_td);
@@ -92,7 +96,7 @@ class mpQuestions
         if (defined(WP_DEBUG) && WP_DEBUG) {
             $patch_nr = date("yWHis");
         }
-        return apply_filters($this->plugin_slug . '_verspatch', $patch_nr);
+        return apply_filters($this->plugin_slug . '_versbuild', $patch_nr);
     }
     function loadTextdomain()
     {
@@ -271,9 +275,9 @@ class mpQuestions
 
         if (!is_admin()) {
             wp_enqueue_script('jquery');
-            wp_register_script('bootstrap', $this->mpqdir . 'assets/js/bootstrap.bundle.min.js', ['jquery'], $rlvhv . '.' . $this->verspatch, true);
+            wp_register_script('bootstrap', $this->mpqdir . 'assets/js/bootstrap.bundle.min.js', ['jquery'], $rlvhv . '.' . $this->versbuild, true);
             wp_enqueue_script('bootstrap');
-            wp_register_script('mpq', $mpq_js, ['jquery', 'bootstrap'], $this->vers . '.' . $this->verspatch, true);
+            wp_register_script('mpq', $mpq_js, ['jquery', 'bootstrap'], $this->vers . '.' . $this->versbuild, true);
             wp_enqueue_script('mpq');
         }
     }
@@ -298,7 +302,7 @@ class mpQuestions
 
             $dependon_css = apply_filters($this->plugin_slug . '_dependon_css', ['bootstrap', 'open-iconic-bootstrap', 'firework']);
 
-            wp_register_style('grid5x5', $mpq_css, $dependon_css, $this->vers . '.' . $this->verspatch, 'all');
+            wp_register_style('grid5x5', $mpq_css, $dependon_css, $this->vers . '.' . $this->versbuild, 'all');
             wp_enqueue_style('grid5x5');
         }
     }
