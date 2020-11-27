@@ -4,8 +4,6 @@
  */
 get_header();
 $prefix = 'mpc_';
-$randomkaulins = mt_rand(1, 6);
-
 ?>
 
 <main role="main" class="container mt-3 grid5x5_container">
@@ -29,9 +27,7 @@ $randomkaulins = mt_rand(1, 6);
                         <span class="align-middle">
                             <span class="oi oi-grid-two-up display-4 align-middle"></span>
                             <span id="laukums" class="display-4 align-middle ml-3">0</span>
-
                         </span>
-
                     </p>
 
                 </div>
@@ -73,20 +69,21 @@ $randomkaulins = mt_rand(1, 6);
                 </article>
 
                 <?php
-                $core8_news_postsq = new WP_Query([
+                $core8_questions_postsq = new WP_Query([
                     'post_type'      => apply_filters('mpq_mpquestions_posts_list', ['mpquestions',]),
                     'posts_per_page' => apply_filters('mpq_mpquestions_posts_per_page', 23),
                     'paged'          => get_query_var('paged'),
-                    'order'          => 'ASC',
-                    'meta_key'       => $prefix . 'nrpk',
-                    'orderby'        => 'meta_value_num',
-                    'no_found_rows'  => true, //useful when pagination is not needed
+                    'order'          => 'rand',
+                    'no_found_rows'  => true,
                 ]);
-                if ($core8_news_postsq->have_posts()) {
+
+                $fieldnr = 0;
+                if ($core8_questions_postsq->have_posts()) {
 
                     // Load posts loop.
-                    while ($core8_news_postsq->have_posts()) {
-                        $core8_news_postsq->the_post();
+                    while ($core8_questions_postsq->have_posts()) {
+                        $core8_questions_postsq->the_post();
+                        ++$fieldnr;
                         //get_template_part('template-parts/content/content', 'mpquestions-grid');
 
                         $thispostid = get_the_ID();
@@ -122,26 +119,26 @@ $randomkaulins = mt_rand(1, 6);
                         ?>
                         
                         <article id="post-<?php the_ID(); ?>" <?php post_class('article-wrap grid5x5-single'); ?> 
-                            itemscope itemtype="http://schema.org/CreativeWork" 
-                            data-mpgridnr="<?= $nrpk ?>" 
+                            itemscope itemtype="http://schema.org/CreativeWork"  
+                            data-mpgridnr="<?= $fieldnr ?>" 
                             data-plus="<?= $solis ?>" 
                             data-permalink="<?=$permalink ?>" 
                             data-bgimg="<?=$field_attach_data['src'] ?>">
 
                             <div class="grid5x5-box">
-                                <?php echo  '<p class="entry-title h2 text-shadow1"><span href="' . $permalink . '" rel="bookmark" title="' . $title . '" >' . $nrpk . "</span></p>"; ?>
+                                <?php echo  '<p class="entry-title h2 text-shadow1"><span href="' . $permalink . '" rel="bookmark" title="' . $title . '" >' . $fieldnr . "</span></p>"; ?>
                                 <div id="<?php echo $posttype; ?>-<?php echo $thispostid; ?>-content" <?php post_class(); ?>>
                                     <div class="entry-content" itemprop="text">
                                         <span 
                                             class="mpc_box-questionlink mpc_box-questionlink-<?= $nrpk ?> grid-mpquestion" 
-                                            data-nrpk="<?= $nrpk ?>" 
+                                            data-nrpk="<?= $fieldnr ?>" 
                                             data-slug="<?= $mpq_data->post_name ?>" 
                                             data-title="<?= $mpq_data->post_title ?>" 
                                             data-postid="<?= $mpq_data->ID ?>" 
                                             data-toggle="mopal" 
                                             data-xactive="false" 
                                             data-target="#empModal"
-                                        ><small class="btn btn-light d-none mpquestion_btn btn-lg"><!-- <?php _e('Question', 'medijpratibalv'); ?> --><span class="oi oi-question-mark"></span></small></span>
+                                        ><small class="btn btn-light d-none mpquestion_btn btn-lg"><span class="oi oi-question-mark"></span></small></span>
                                     </div>
                                 </div>
                             </div>
@@ -156,7 +153,7 @@ $randomkaulins = mt_rand(1, 6);
                                 // If no content, include the "No posts found" template.
                                 get_template_part('template-parts/content/content', 'none-grid');
                             }
-                                    ?>
+                        ?>
 
                 <article id="post-001-finish" class="article-wrap grid5x5-single" itemscope itemtype="http://schema.org/CreativeWork" data-mpgridnr="24" data-plus="0">
                     <div class="grid5x5-box">

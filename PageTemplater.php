@@ -4,11 +4,6 @@
  * @author Tom McFarlin
  * @link https://github.com/tommcfarlin/page-template-example
  */
-
-if( ! defined( 'ABSPATH') ) {
-    exit;
-}
-
 class PageTemplater {
 
 	/**

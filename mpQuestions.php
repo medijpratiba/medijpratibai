@@ -2,8 +2,8 @@
 
 /** 
  * Plugin Name: Medijpratiba.lv jautājumi
- * Version: 1.1.0
- * Plugin URI: https://medijpratiba.lv/spele/
+ * Version: 1.1.1
+ * Plugin URI: https://mediabox.lv/wordpress/
  * Description: Medijpratiba.lv spēles jautājumi
  * Author: Rolands Umbrovskis
  * Author URI: https://umbrovskis.com
@@ -12,10 +12,6 @@
  * License: GNU General Public License
  * 
  */
-
-if( ! defined( 'ABSPATH') ) {
-    exit;
-}
 
 require_once __DIR__ . '/PageTemplater.php';
 
@@ -40,8 +36,8 @@ require_once __DIR__ . '/helpers.php';
 class mpQuestions
 {
 
-    var $vers = '1.1.0';
-    var $versbuild; // build version 
+    var $vers = '1.1.1';
+    var $verspatch; // patch version 
     var $plugin_slug;
     var $label_singular;
     var $label_plural;
@@ -53,12 +49,15 @@ class mpQuestions
 
     var $custom_template = 'tpl_medijpratibalv_5x5.php';
 
+    var $game_questions = [];
+    var $total_questions;
+
     function __construct()
     {
         $this->plugin_td = 'medijpratibalv';
         $this->plugin_slug = 'mpquestions';
 
-        $this->versbuild = $this->versionPatch();
+        $this->verspatch = $this->versionPatch();
 
         $this->label_plural = __('Questions', $this->plugin_td);
         $this->label_singular = __('Question', $this->plugin_td);
@@ -83,6 +82,9 @@ class mpQuestions
 
         add_action('wp_ajax_mpq_action', [$this, 'mpcAjaxAction']);
         add_action('wp_ajax_nopriv_mpq_action', [$this, 'mpcAjaxAction']);
+
+        add_action('wp_ajax_mpreset_action', [$this, 'resetAjaxQuestion']);
+        add_action('wp_ajax_nopriv_mpreset_action', [$this, 'resetAjaxQuestion']);
     }
 
     public function versionPatch()
@@ -92,11 +94,11 @@ class mpQuestions
          * Version patch
          * Can filter
          */
-        $patch_nr = 0;
+        $patch_nr = 1;
         if (defined(WP_DEBUG) && WP_DEBUG) {
             $patch_nr = date("yWHis");
         }
-        return apply_filters($this->plugin_slug . '_versbuild', $patch_nr);
+        return apply_filters($this->plugin_slug . '_verspatch', $patch_nr);
     }
     function loadTextdomain()
     {
@@ -110,8 +112,8 @@ class mpQuestions
         register_post_type(
             $this->plugin_slug,
             [
-                'label'           => $this->label_plural,
-                'description'     => '',
+                'label'           => __('Questions', $this->plugin_td),
+                'description'     => 'Medijpratiba.lv spēles jautājumi',
                 'public'          => true,
                 'show_ui'         => true,
                 'show_in_menu'    => true,
@@ -136,9 +138,9 @@ class mpQuestions
                 ],
                 'taxonomies'      => ['post_tag', $this->plugin_slug . '_tag'],
                 'labels'          => [
-                    'name'               => $this->label_plural,
-                    'singular_name'      => $this->label_singular,
-                    'menu_name'          => $this->label_plural,
+                    'name'               => __('Questions', $this->plugin_td),
+                    'singular_name'      => __('Question', $this->plugin_td),
+                    'menu_name'          => __('Questions', $this->plugin_td),
                     'add_new'            => __('Add new', $this->plugin_td),
                     'add_new_item'       => __('Add new Question', $this->plugin_td),
                     'edit'               => __('Edit', $this->plugin_td),
@@ -170,6 +172,8 @@ class mpQuestions
         }
 
         register_taxonomy_for_object_type('post_tag', $this->plugin_slug);
+        // placeholder for data
+        set_transient('game_questions_used', [], 12 * HOUR_IN_SECONDS);
     }
 
     /**
@@ -199,8 +203,8 @@ class mpQuestions
                 [
                     'type' => 'number',
                     'id'   => $prefix . 'solis',
-                    'name' => esc_html__('Step', $this->plugin_td),
-                    'desc' => esc_html__('0 ... 3', $this->plugin_td),
+                    'name' => esc_html__('Step', 'mpc-generator'),
+                    'desc' => esc_html__('0 ... 3', 'mpc-generator'),
                     'min'  => 0,
                     'max'  => 3,
                     'step' => 1,
@@ -275,9 +279,9 @@ class mpQuestions
 
         if (!is_admin()) {
             wp_enqueue_script('jquery');
-            wp_register_script('bootstrap', $this->mpqdir . 'assets/js/bootstrap.bundle.min.js', ['jquery'], $rlvhv . '.' . $this->versbuild, true);
+            wp_register_script('bootstrap', $this->mpqdir . 'assets/js/bootstrap.bundle.min.js', ['jquery'], $rlvhv . '.' . $this->verspatch, true);
             wp_enqueue_script('bootstrap');
-            wp_register_script('mpq', $mpq_js, ['jquery', 'bootstrap'], $this->vers . '.' . $this->versbuild, true);
+            wp_register_script('mpq', $mpq_js, ['jquery', 'bootstrap'], $this->vers . '.' . $this->verspatch, true);
             wp_enqueue_script('mpq');
         }
     }
@@ -302,7 +306,7 @@ class mpQuestions
 
             $dependon_css = apply_filters($this->plugin_slug . '_dependon_css', ['bootstrap', 'open-iconic-bootstrap', 'firework']);
 
-            wp_register_style('grid5x5', $mpq_css, $dependon_css, $this->vers . '.' . $this->versbuild, 'all');
+            wp_register_style('grid5x5', $mpq_css, $dependon_css, $this->vers . '.' . $this->verspatch, 'all');
             wp_enqueue_style('grid5x5');
         }
     }
@@ -330,15 +334,56 @@ class mpQuestions
         return $hints;
     }
 
+    public function getRandomQuestion($current = 0, $not_in = []){
+        $questions_randomq = new WP_Query([
+            'post_type'      => apply_filters('mpq_questions_randomq', [$this->plugin_slug]),
+            'posts_per_page' => 1,
+            'order'          => 'rand',
+            'post__not_in'   => $not_in,
+            'no_found_rows'  => true,
+        ]);
+        if ($questions_randomq->have_posts()) {
+            while ($questions_randomq->have_posts()) {
+                $questions_randomq->the_post();
+                return get_the_ID();
+            }
+        }else{
+            // returning asked question, ignoring NOT IN list
+            return $current;
+        }
+    }
     /**
      * AJAX calls to WordPress backend
      */
     public function mpcAjaxAction()
     {
+        $this->total_questions = (int)wp_count_posts($this->plugin_slug)->publish;
+
         // Did we ask for data?
         if (!empty($_POST['postid'])) {
-            // global $wpdb; // this is how you get access to the database
             $postid = intval($_POST['postid']);
+
+            $game_questions_used = !empty(get_transient('game_questions_used'))?get_transient('game_questions_used'):[];
+            $game_questions_used2 = [];
+            $game_questions_used3 = [];
+
+            // we used all questions, repeat already answerd
+            if ((count($game_questions_used) >= $this->total_questions)) {
+                set_transient('game_questions_used', [], 12 * HOUR_IN_SECONDS);
+            }
+
+            // get random question if this was used
+            if (in_array($postid, $game_questions_used)) {
+                 $postid = $this->getRandomQuestion($postid, $game_questions_used);
+                $game_questions_used2 = array_merge(get_transient('game_questions_used'),[$postid]);
+                set_transient('game_questions_used', $game_questions_used2, 12 * HOUR_IN_SECONDS);
+            }
+            // Add requested question to the "used" list
+            if(($this->total_questions > count($game_questions_used))){
+                $game_questions_used3 = array_merge(get_transient('game_questions_used'),[$postid]);
+                set_transient('game_questions_used', $game_questions_used3, 12 * HOUR_IN_SECONDS);
+            }
+
             $mpq_data = get_post($postid);
             $question = get_the_title($postid);
             $postid = $mpq_data->ID;
@@ -348,12 +393,17 @@ class mpQuestions
             $atbildes_n = rwmb_meta($prefix . 'atbildes_n', [], $postid);
             $paskaidrojums = rwmb_meta($prefix . 'paskaidrojums', [], $postid);
             $solis = rwmb_meta($prefix . 'solis', [], $postid);
+            // in case it's empty
+            $solis = (isset($solis) && !empty($solis))?$solis:1;
             $nrpk = rwmb_meta($prefix . 'nrpk', [], $postid);
 
             $atbildes = array_merge((array)$atbildes_y, $atbildes_n); // Merge all answers in one array
             shuffle($atbildes); // Otherwise the correct answer always is first. Now random.
 
             echo '<p><strong>' . $question . '</strong></p>';
+            if(!empty(get_the_content(null,false, $postid))){
+                echo '<div class="question_content">'.get_the_content(null,false, $postid).'</div>';
+            }
 
             echo '<p>' . __("Answers", 'medijpratibalv') . ':</p>';
 
@@ -371,5 +421,11 @@ class mpQuestions
         }
 
         wp_die();
+    }
+
+    public function resetAjaxQuestion(){
+        set_transient('game_questions_used', [], 12 * HOUR_IN_SECONDS);
+        wp_die();
+
     }
 }
