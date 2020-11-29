@@ -10,7 +10,7 @@ var laukums_old = 0;
 var randomkaulins = 1; // Default/start value
 const class2ad = 'border-dark rounded-0 bg-info active shadow-sm';
 
-const fireworkttl = 10 * 1000; // 10 sec
+const fireworkttl = (10 * 1000); // 10 sec
 
 jQuery(document).ready(function () {
     /**
@@ -158,6 +158,8 @@ jQuery(document).ready(function () {
         randomkaulins = 1
         laukums_old = 0
         laukums = 0
+        
+        location.reload();
     })
 
     jQuery('.grid-mpquestion').click(function () {
@@ -181,8 +183,8 @@ jQuery(document).ready(function () {
             jQuery('.modal-body').html(response)
 
             // Display Modal
-            jQuery('#empModal').modal('show')
-            jQuery('#empModal').data('postid', postid)
+            jQuery('#mpqModal').modal('show')
+            jQuery('#mpqModal').data('postid', postid)
             jQuery('.mpq_answer').click(function () {
                 var mpqcorrect = jQuery(this).data('mpqcorrect')
                 jQuery('.mpq_description').removeClass('d-none')
@@ -190,13 +192,13 @@ jQuery(document).ready(function () {
                 laukums_old = laukums
                 if (mpqcorrect === 1) {
                     jQuery(this).addClass('bg-success p-2')
-                    if (jQuery('#empModal').data('postid') === postid) {
+                    if (jQuery('#mpqModal').data('postid') === postid) {
                         laukums = laukums + solis
                     }
                 }
                 if (mpqcorrect === 0) {
                     jQuery(this).addClass('bg-danger p-2')
-                    if (jQuery('#empModal').data('postid') === postid) {
+                    if (jQuery('#mpqModal').data('postid') === postid) {
                         var laukuma_solis = laukums - solis
                         if (laukuma_solis < circusfield_min) {
                             laukums = circusfield_min
@@ -208,7 +210,7 @@ jQuery(document).ready(function () {
                 }
 
                 jQuery(this)
-                    .closest('#empModal')
+                    .closest('#mpqModal')
                     .on('hide.bs.modal', function () {
                         jQuery('#laukums').html(laukums)
                         if (laukums > circusfield_max) {
@@ -264,7 +266,7 @@ jQuery(document).ready(function () {
                         laukums_old = laukums
                     })
 
-                jQuery('#empModal').removeData('postid')
+                jQuery('#mpqModal').removeData('postid')
 
                 if (laukums == circusfield_min || laukums == circusfield_last) {
                     jQuery('.mest').data('canroll', 'yes')

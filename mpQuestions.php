@@ -88,7 +88,6 @@ class mpQuestions
         add_action('wp_ajax_nopriv_mpreset_action', [$this, 'resetAjaxQuestion']);
 
         $this->transient_ttl = 1 * HOUR_IN_SECONDS;
-
     }
 
     public function versionPatch()
@@ -98,9 +97,9 @@ class mpQuestions
          * Version patch
          * Can filter
          */
-        $patch_nr = 1;
+        $patch_nr = date("yWz");
         if (defined(WP_DEBUG) && WP_DEBUG) {
-            $patch_nr = date("yWHis");
+            $patch_nr = date("yWz.His");
         }
         return apply_filters($this->plugin_slug . '_versbuild', $patch_nr);
     }
@@ -337,14 +336,22 @@ class mpQuestions
         return $hints;
     }
 
+    public function randomQueryOrder()
+    {
+        return array_rand(array_flip(['ASC', 'DESC']), 1);
+    }
+
     public function getRandomQuestion($current = 0, $not_in = [])
     {
+
+        $random_order = $this->randomQueryOrder();
         $questions_randomq = new WP_Query([
             'post_type'      => apply_filters('mpq_questions_randomq', [$this->plugin_slug]),
             'posts_per_page' => 1,
-            'order'          => 'rand',
+            'orderby'        => 'rand',
             'post__not_in'   => $not_in,
             'no_found_rows'  => true,
+            'order'          => $random_order,
         ]);
         if ($questions_randomq->have_posts()) {
             while ($questions_randomq->have_posts()) {
@@ -356,13 +363,107 @@ class mpQuestions
             return $current;
         }
     }
+
+    public function getRandomStart($size = 23)
+    {
+        $random_start_order = $this->randomQueryOrder();
+        $random_start_questions_q = new WP_Query([
+            'post_type'      => apply_filters('mpq_mpquestions_posts_list', [$this->plugin_slug]),
+            'posts_per_page' => (isset($size) && !empty($size)) ? (int)$size : 23,
+            'orderby'        => 'rand',
+            'order'          => $random_start_order,
+            'no_found_rows'  => true,
+            'paged'          => get_query_var('paged'),
+        ]);
+
+        return $random_start_questions_q;
+    }
+
+    /**
+     * Start of the game fields
+     */
+    public function startFields()
+    {
+        $mpd_questions_query = $this->getRandomStart();
+
+        $fieldnr = 0;
+        if ($mpd_questions_query->have_posts()) {
+
+            // Load posts loop.
+            while ($mpd_questions_query->have_posts()) {
+                $mpd_questions_query->the_post();
+                ++$fieldnr;
+                $thispostid = get_the_ID();
+                $mpq_data = get_post($thispostid);
+                $posttype   = get_post_type($thispostid);
+                $permalink = get_permalink($thispostid);
+                $title = get_the_title($thispostid);
+                $attach_data = [];
+                $field_attach_data  = [
+                    'src'    => $this->mpqdir . 'assets/img/conor-samuel-circus-300.jpg',
+                    'width'  => 300,
+                    'height' => 300
+                ];
+                /**
+                 * Post meta fields
+                 */
+                $prefix = 'mpc_';
+                $nrpk = rwmb_meta($prefix . 'nrpk'); // field nr.
+                $solis = rwmb_meta($prefix . 'solis'); // step
+
+                if (has_post_thumbnail($thispostid)) {
+                    $attach_data = wp_get_attachment_image_src(get_post_thumbnail_id($thispostid), 'medium');
+                }
+
+                if (!empty($attach_data)) {
+                    $field_attach_data  = [
+                        'src' => $attach_data[0],
+                        'width' => $attach_data[1],
+                        'height' => $attach_data[2]
+                    ];
+                }
+
+?>
+
+                <article id="post-<?php the_ID(); ?>" <?php post_class('article-wrap grid5x5-single'); ?> itemscope itemtype="http://schema.org/CreativeWork" data-mpgridnr="<?= $fieldnr ?>" data-plus="<?= $solis ?>" data-permalink="<?= $permalink ?>" data-bgimg="<?= $field_attach_data['src'] ?>">
+
+                    <div class="grid5x5-box">
+                        <?php echo '<p class="entry-title h2 text-shadow1"><span href="' . $permalink . '" rel="bookmark" title="' . esc_attr($title) . '" >' . $fieldnr . "</span></p>"; ?>
+                        <div id="<?php echo $posttype; ?>-<?php echo $thispostid; ?>-content" <?php post_class(); ?>>
+                            <div class="entry-content" itemprop="text">
+                                <span class="mpc_box-questionlink mpc_box-questionlink-<?= $nrpk ?> grid-mpquestion" data-nrpk="<?= $fieldnr ?>" data-slug="<?= $mpq_data->post_name ?>" data-postid="<?= $mpq_data->ID ?>" data-toggle="mopal" data-xactive="false" data-target="#mpqModal"><small class="btn btn-light d-none mpquestion_btn btn-lg"><span class="oi oi-question-mark"></span></small></span>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+            <?php
+
+            }
+            // Previous/next page navigation.
+            // we do not need navigation here
+        } else {
+
+            // If no content, include the "No posts found" template.
+            ?>
+            <article id="error-404" class="post-404 page type-page status-publish hentry article-wrap grid5x5-single" itemscope="" itemtype="http://schema.org/CreativeWork">
+                <div class="grid5x5-box">
+                    <div class="entry-content" itemprop="text">
+                        <p>x</p>
+                    </div>
+                </div>
+            </article>
+
+<?php
+        }
+    }
+
     /**
      * AJAX calls to WordPress backend
      */
     public function mpcAjaxAction()
     {
         $this->total_questions = (int)wp_count_posts($this->plugin_slug)->publish;
-        $game_questions_used = !empty(get_transient('game_questions_used'))?get_transient('game_questions_used'):[];
+        $game_questions_used = !empty(get_transient('game_questions_used')) ? get_transient('game_questions_used') : [];
 
         // Did we ask for data?
         if (!empty($_POST['postid'])) {
