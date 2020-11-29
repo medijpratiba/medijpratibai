@@ -87,6 +87,9 @@ class mpQuestions
         add_action('wp_ajax_mpreset_action', [$this, 'resetAjaxQuestion']);
         add_action('wp_ajax_nopriv_mpreset_action', [$this, 'resetAjaxQuestion']);
 
+        add_filter( 'manage_'.$this->plugin_slug.'_posts_columns', [$this, 'set_custom_edit_'.$this->plugin_slug.'_columns'] );    
+        add_action( 'manage_'.$this->plugin_slug.'_posts_custom_column' , [$this,'custom_'.$this->plugin_slug.'_column'], 10, 2 );
+
         $this->transient_ttl = 1 * HOUR_IN_SECONDS;
     }
 
@@ -408,8 +411,8 @@ class mpQuestions
                  * Post meta fields
                  */
                 $prefix = 'mpc_';
-                $nrpk = rwmb_meta($prefix . 'nrpk'); // field nr.
-                $solis = rwmb_meta($prefix . 'solis'); // step
+                $nrpk = $this->get_metafield($prefix . 'nrpk', $thispostid); // field nr.
+                $solis = $this->get_metafield($prefix . 'solis', $thispostid);  // step
 
                 if (has_post_thumbnail($thispostid)) {
                     $attach_data = wp_get_attachment_image_src(get_post_thumbnail_id($thispostid), 'medium');
@@ -491,13 +494,13 @@ class mpQuestions
             $postid = $mpq_data->ID;
 
             $prefix = 'mpc_';
-            $atbildes_y = rwmb_meta($prefix . 'atbildes_y', [], $postid);
-            $atbildes_n = rwmb_meta($prefix . 'atbildes_n', [], $postid);
-            $paskaidrojums = rwmb_meta($prefix . 'paskaidrojums', [], $postid);
-            $solis = rwmb_meta($prefix . 'solis', [], $postid);
+            $atbildes_y = $this->get_metafield($prefix . 'atbildes_y', $postid);
+            $atbildes_n = $this->get_metafield($prefix . 'atbildes_n', $postid);
+            $paskaidrojums = $this->get_metafield($prefix . 'paskaidrojums', $postid);
+            $solis = $this->get_metafield($prefix . 'solis', $postid);
             // in case it's empty
             $solis = (isset($solis) && !empty($solis)) ? $solis : 1;
-            $nrpk = rwmb_meta($prefix . 'nrpk', [], $postid);
+            $nrpk = $this->get_metafield($prefix . 'nrpk', $postid);
 
             $atbildes = array_merge((array)$atbildes_y, $atbildes_n); // Merge all answers in one array
             shuffle($atbildes); // Otherwise the correct answer always is first. Now random.
@@ -530,4 +533,54 @@ class mpQuestions
         set_transient('game_questions_used', [], $this->transient_ttl);
         wp_die();
     }
+
+    public function set_custom_edit_mpquestions_columns($columns)
+    {
+        $columns['mpc_solis'] = __("Step", $this->plugin_td);
+        $columns['mpc_iamge'] = __("Image", $this->plugin_td);
+        return $columns;
+    }
+
+    public function custom_mpquestions_column($column, $post_id)
+    {
+        $prefix = 'mpc_';
+        $solis = $this->get_metafield($prefix . 'solis', $post_id);
+        $show_solis = empty($solis) ? 1 : (int)$solis;
+
+        $attach_data = [];
+        $field_attach_data  = [
+            'src'    => $this->mpqdir . 'assets/img/conor-samuel-circus-300.jpg',
+            'width'  => 300,
+            'height' => 300
+        ];
+        $img_border=0;
+        if (has_post_thumbnail($post_id)) {
+            $attach_data = wp_get_attachment_image_src(get_post_thumbnail_id($post_id), 'thumbnail');
+            $img_border=3;
+        }
+
+        if (!empty($attach_data)) {
+            $field_attach_data  = [
+                'src' => $attach_data[0],
+                'width' => $attach_data[1],
+                'height' => $attach_data[2]
+            ];
+        }
+
+        switch ($column) {
+            case 'mpc_solis':
+                echo $show_solis;
+                break;
+            case 'mpc_iamge':
+                echo '<img src="'.$field_attach_data['src'].'" height="80" width="auto" style="border-bottom:'.$img_border.'px solid rgba(109, 36, 0, 0.9); padding-bottom:'.$img_border.'px;" />'; 
+                break;
+        }
+    }
+
+    public function get_metafield($field='', $post_id = 0, $args = []){
+        return rwmb_meta($field, $args, $post_id);
+    }
+    
 }
+
+
