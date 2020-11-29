@@ -7,7 +7,7 @@ $prefix = 'mpc_';
 ?>
 
 <main role="main" class="container mt-3 grid5x5_container">
-    <!-- salūts -->
+
     <div class="no-pyro" id="saluts">
         <div class="before"></div>
         <div class="after"></div>
@@ -84,8 +84,6 @@ $prefix = 'mpc_';
                     while ($core8_questions_postsq->have_posts()) {
                         $core8_questions_postsq->the_post();
                         ++$fieldnr;
-                        //get_template_part('template-parts/content/content', 'mpquestions-grid');
-
                         $thispostid = get_the_ID();
                         $mpq_data = get_post($thispostid);
                         $posttype   = get_post_type($thispostid);

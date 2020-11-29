@@ -2,7 +2,7 @@
 
 /** 
  * Plugin Name: Medijpratiba.lv jautājumi
- * Version: 1.1.1
+ * Version: 1.1.2
  * Plugin URI: https://medijpratiba.lv/spele/
  * Description: Medijpratiba.lv spēles jautājumi
  * Author: Rolands Umbrovskis
@@ -36,7 +36,7 @@ require_once __DIR__ . '/helpers.php';
 class mpQuestions
 {
 
-    var $vers = '1.1.1';
+    var $vers = '1.1.2';
     var $versbuild; // build version 
     var $plugin_slug;
     var $label_singular;
@@ -51,6 +51,7 @@ class mpQuestions
 
     var $game_questions = [];
     var $total_questions;
+    var $transient_ttl;
 
     function __construct()
     {
@@ -85,6 +86,9 @@ class mpQuestions
 
         add_action('wp_ajax_mpreset_action', [$this, 'resetAjaxQuestion']);
         add_action('wp_ajax_nopriv_mpreset_action', [$this, 'resetAjaxQuestion']);
+
+        $this->transient_ttl = 1 * HOUR_IN_SECONDS;
+
     }
 
     public function versionPatch()
@@ -173,7 +177,6 @@ class mpQuestions
 
         register_taxonomy_for_object_type('post_tag', $this->plugin_slug);
         // placeholder for data
-        set_transient('game_questions_used', [], 12 * HOUR_IN_SECONDS);
     }
 
     /**
@@ -275,7 +278,7 @@ class mpQuestions
     public function enqueueScripts()
     {
         $rlvhv = $this->vers;
-        $mpq_js = $this->mpqdir . 'assets/js/mpq-' . $this->vers . '.js';
+        $mpq_js = $this->mpqdir . 'assets/js/mpq.js';
 
         if (!is_admin()) {
             wp_enqueue_script('jquery');
@@ -334,7 +337,8 @@ class mpQuestions
         return $hints;
     }
 
-    public function getRandomQuestion($current = 0, $not_in = []){
+    public function getRandomQuestion($current = 0, $not_in = [])
+    {
         $questions_randomq = new WP_Query([
             'post_type'      => apply_filters('mpq_questions_randomq', [$this->plugin_slug]),
             'posts_per_page' => 1,
@@ -347,7 +351,7 @@ class mpQuestions
                 $questions_randomq->the_post();
                 return get_the_ID();
             }
-        }else{
+        } else {
             // returning asked question, ignoring NOT IN list
             return $current;
         }
@@ -358,30 +362,27 @@ class mpQuestions
     public function mpcAjaxAction()
     {
         $this->total_questions = (int)wp_count_posts($this->plugin_slug)->publish;
+        $game_questions_used = !empty(get_transient('game_questions_used'))?get_transient('game_questions_used'):[];
 
         // Did we ask for data?
         if (!empty($_POST['postid'])) {
             $postid = intval($_POST['postid']);
 
-            $game_questions_used = !empty(get_transient('game_questions_used'))?get_transient('game_questions_used'):[];
-            $game_questions_used2 = [];
-            $game_questions_used3 = [];
-
             // we used all questions, repeat already answerd
             if ((count($game_questions_used) >= $this->total_questions)) {
-                set_transient('game_questions_used', [], 12 * HOUR_IN_SECONDS);
+                set_transient('game_questions_used', [], $this->transient_ttl);
             }
 
             // get random question if this was used
             if (in_array($postid, $game_questions_used)) {
-                 $postid = $this->getRandomQuestion($postid, $game_questions_used);
-                $game_questions_used2 = array_merge(get_transient('game_questions_used'),[$postid]);
-                set_transient('game_questions_used', $game_questions_used2, 12 * HOUR_IN_SECONDS);
+                $postid = $this->getRandomQuestion($postid, $game_questions_used);
+                $game_questions_used2 = array_merge($game_questions_used, [$postid]);
+                set_transient('game_questions_used', $game_questions_used2, $this->transient_ttl);
             }
             // Add requested question to the "used" list
-            if(($this->total_questions > count($game_questions_used))){
-                $game_questions_used3 = array_merge(get_transient('game_questions_used'),[$postid]);
-                set_transient('game_questions_used', $game_questions_used3, 12 * HOUR_IN_SECONDS);
+            if (($this->total_questions > count($game_questions_used))) {
+                $game_questions_used3 = array_merge($game_questions_used, [$postid]);
+                set_transient('game_questions_used', $game_questions_used3, $this->transient_ttl);
             }
 
             $mpq_data = get_post($postid);
@@ -394,15 +395,15 @@ class mpQuestions
             $paskaidrojums = rwmb_meta($prefix . 'paskaidrojums', [], $postid);
             $solis = rwmb_meta($prefix . 'solis', [], $postid);
             // in case it's empty
-            $solis = (isset($solis) && !empty($solis))?$solis:1;
+            $solis = (isset($solis) && !empty($solis)) ? $solis : 1;
             $nrpk = rwmb_meta($prefix . 'nrpk', [], $postid);
 
             $atbildes = array_merge((array)$atbildes_y, $atbildes_n); // Merge all answers in one array
             shuffle($atbildes); // Otherwise the correct answer always is first. Now random.
 
             echo '<p><strong>' . $question . '</strong></p>';
-            if(!empty(get_the_content(null,false, $postid))){
-                echo '<div class="question_content">'.get_the_content(null,false, $postid).'</div>';
+            if (!empty(get_the_content(null, false, $postid))) {
+                echo '<div class="question_content">' . get_the_content(null, false, $postid) . '</div>';
             }
 
             echo '<p>' . __("Answers", 'medijpratibalv') . ':</p>';
@@ -423,9 +424,9 @@ class mpQuestions
         wp_die();
     }
 
-    public function resetAjaxQuestion(){
-        set_transient('game_questions_used', [], 12 * HOUR_IN_SECONDS);
+    public function resetAjaxQuestion()
+    {
+        set_transient('game_questions_used', [], $this->transient_ttl);
         wp_die();
-
     }
 }
