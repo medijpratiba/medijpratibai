@@ -2,7 +2,7 @@
 
 /** 
  * Plugin Name: Medijpratiba.lv jautājumi
- * Version: 1.1.2
+ * Version: 1.1.3
  * Plugin URI: https://medijpratiba.lv/spele/
  * Description: Medijpratiba.lv spēles jautājumi
  * Author: Rolands Umbrovskis
@@ -36,7 +36,7 @@ require_once __DIR__ . '/helpers.php';
 class mpQuestions
 {
 
-    var $vers = '1.1.2';
+    var $vers = '1.1.3';
     var $versbuild; // build version 
     var $plugin_slug;
     var $label_singular;
