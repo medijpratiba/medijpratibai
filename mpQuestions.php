@@ -2,13 +2,15 @@
 
 /** 
  * Plugin Name: Medijpratiba.lv jautājumi
- * Version: 1.1.3
+ * Version: 1.1.4
  * Plugin URI: https://medijpratiba.lv/spele/
  * Description: Medijpratiba.lv spēles jautājumi
- * Author: Rolands Umbrovskis
- * Author URI: https://umbrovskis.com
  * Text Domain: medijpratibalv
  * Domain Path: /languages
+ * Author: Rolands Umbrovskis
+ * Requires at least: 4.5
+ * Tested up to: 5.5.3
+ * Author URI: https://umbrovskis.com
  * License: GNU General Public License
  * 
  */
@@ -36,7 +38,7 @@ require_once __DIR__ . '/helpers.php';
 class mpQuestions
 {
 
-    var $vers = '1.1.3';
+    var $vers = '1.1.4';
     var $versbuild; // build version 
     var $plugin_slug;
     var $label_singular;
@@ -75,7 +77,6 @@ class mpQuestions
         add_filter('rwmb_meta_boxes',  [&$this, 'registerMb']);
         add_filter('single_template',  [&$this, 'loadSingleTemplate']);
 
-        add_action('wp_head', [$this, 'ajaxUrl']);
         add_action('wp_enqueue_scripts', [$this, 'enqueueScripts']);
         add_action('wp_enqueue_scripts', [$this, 'enqueueStyles'], 15);
 
@@ -87,8 +88,8 @@ class mpQuestions
         add_action('wp_ajax_mpreset_action', [$this, 'resetAjaxQuestion']);
         add_action('wp_ajax_nopriv_mpreset_action', [$this, 'resetAjaxQuestion']);
 
-        add_filter( 'manage_'.$this->plugin_slug.'_posts_columns', [$this, 'set_custom_edit_'.$this->plugin_slug.'_columns'] );    
-        add_action( 'manage_'.$this->plugin_slug.'_posts_custom_column' , [$this,'custom_'.$this->plugin_slug.'_column'], 10, 2 );
+        add_filter('manage_' . $this->plugin_slug . '_posts_columns', [$this, 'set_custom_edit_' . $this->plugin_slug . '_columns']);
+        add_action('manage_' . $this->plugin_slug . '_posts_custom_column', [$this, 'custom_' . $this->plugin_slug . '_column'], 10, 2);
 
         $this->transient_ttl = 1 * HOUR_IN_SECONDS;
     }
@@ -266,15 +267,6 @@ class mpQuestions
     }
 
     /**
-     * dirty way to include missing "ajaxurl" in some cases
-     * @todo let's hope it'll not break sites if it does - https://github.com/republa/medijpratiba_jauta/issues
-     */
-    public function ajaxUrl()
-    {
-        echo '<script type="text/javascript">var ajaxurl = "' . admin_url('admin-ajax.php') . '";</script>';
-    }
-
-    /**
      * Register javascript file(s)
      */
     public function enqueueScripts()
@@ -288,9 +280,18 @@ class mpQuestions
             wp_enqueue_script('bootstrap');
             wp_register_script('mpq', $mpq_js, ['jquery', 'bootstrap'], $this->vers . '.' . $this->versbuild, true);
             wp_enqueue_script('mpq');
+            $this->mpq_inline_script();
         }
     }
-
+    /**
+     * dirty way to include missing "{mpq}ajaxurl" in some cases
+     * some plugins 
+     */
+    public function mpq_inline_script()
+    {
+        $mpqscript_il  = 'var mpqajaxurl = "' . admin_url('admin-ajax.php') . '";';
+        wp_add_inline_script('mpq', $mpqscript_il, 'before');
+    }
     /**
      * Registed CSS style(s)
      */
@@ -553,10 +554,10 @@ class mpQuestions
             'width'  => 300,
             'height' => 300
         ];
-        $img_border=0;
+        $img_border = 0;
         if (has_post_thumbnail($post_id)) {
             $attach_data = wp_get_attachment_image_src(get_post_thumbnail_id($post_id), 'thumbnail');
-            $img_border=3;
+            $img_border = 3;
         }
 
         if (!empty($attach_data)) {
@@ -572,15 +573,13 @@ class mpQuestions
                 echo $show_solis;
                 break;
             case 'mpc_iamge':
-                echo '<img src="'.$field_attach_data['src'].'" height="80" width="auto" style="border-bottom:'.$img_border.'px solid rgba(109, 36, 0, 0.9); padding-bottom:'.$img_border.'px;" />'; 
+                echo '<img src="' . $field_attach_data['src'] . '" height="80" width="auto" style="border-bottom:' . $img_border . 'px solid rgba(109, 36, 0, 0.9); padding-bottom:' . $img_border . 'px;" />';
                 break;
         }
     }
 
-    public function get_metafield($field='', $post_id = 0, $args = []){
+    public function get_metafield($field = '', $post_id = 0, $args = [])
+    {
         return rwmb_meta($field, $args, $post_id);
     }
-    
 }
-
-

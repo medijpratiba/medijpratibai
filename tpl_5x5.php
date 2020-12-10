@@ -85,6 +85,10 @@ $mpqquestions = new mpQuestions();
         </div>
     </div>
 
+    <div class="row">
+        <div class="col-12 text-center"><a href="https://medijpratiba.lv" class="medijpratiba_link">medijpratiba.lv</a></div>
+    </div>
+
 </main>
 <?php
 get_footer();
