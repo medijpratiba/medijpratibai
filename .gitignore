@@ -1,4 +1,6 @@
-/assets/sources/
+/assets/sources/img/
+/assets/sources/js/*bootstrap*
+/assets/sources/sass/*_bootstrap*
 /node_modules/
 
 gulpfile.js
