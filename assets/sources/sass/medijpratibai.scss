@@ -1,6 +1,8 @@
 /*!
  * Medijpratibai WordPress plugin
  */
-@import 'bootstrap'; // Minified Bootstrap v4.4.1
+//@import 'bootstrap'; // Minified Bootstrap v4.4.1
+@import './../../../node_modules/bootstrap/scss/bootstrap.scss';
 @import 'open-iconic-bootstrap';
 @import 'firework';
+@import 'grid5x5';
