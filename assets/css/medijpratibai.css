@@ -8080,6 +8080,7 @@ a.text-dark:hover, a.text-dark:focus {
     margin-top: 30%;
     margin-left: 80%; } }
 
+/*! purgecss start ignore */
 html,
 body {
   max-width: 100%;
@@ -8184,3 +8185,5 @@ html > .page-template-tpl_5x5 {
   .h1,
   .h2 {
     font-size: 1rem; } }
+
+/*! purgecss end ignore */
