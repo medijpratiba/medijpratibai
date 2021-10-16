@@ -2,14 +2,14 @@
 
 /** 
  * Plugin Name: Medijpratiba.lv jautājumi
- * Version: 1.1.4
+ * Version: 1.1.5
  * Plugin URI: https://medijpratiba.lv/spele/
  * Description: Medijpratiba.lv spēles jautājumi
  * Text Domain: medijpratibalv
  * Domain Path: /languages
  * Author: Rolands Umbrovskis
  * Requires at least: 4.5
- * Tested up to: 5.5.3
+ * Tested up to: 5.6
  * Author URI: https://umbrovskis.com
  * License: GNU General Public License
  * 
@@ -38,11 +38,9 @@ require_once __DIR__ . '/helpers.php';
 class mpQuestions
 {
 
-    var $vers = '1.1.4';
+    var $vers = '1.1.5';
     var $versbuild; // build version 
-    var $plugin_slug;
-    var $label_singular;
-    var $label_plural;
+    var $plugin_slug, $label_singular, $label_plural;
     var $plugin_td; // text domain
 
     var $mpqdir; // Plugin's directory
@@ -55,6 +53,8 @@ class mpQuestions
     var $total_questions;
     var $transient_ttl;
 
+    var $min_path_css, $min_path_js;
+
     function __construct()
     {
         $this->plugin_td = 'medijpratibalv';
@@ -66,6 +66,8 @@ class mpQuestions
         $this->label_singular = __('Question', $this->plugin_td);
 
         $this->mpqdir = plugin_dir_url(__FILE__);
+        $this->min_path_css = $this->mpqdir.'assets/css/medijpratibai.min.css';
+        $this->min_path_js = $this->mpqdir . 'assets/js/mpq.min.js';
 
         $this->cb_name = $this->plugin_slug . '_cbq';
 
@@ -271,14 +273,10 @@ class mpQuestions
      */
     public function enqueueScripts()
     {
-        $rlvhv = $this->vers;
-        $mpq_js = $this->mpqdir . 'assets/js/mpq.js';
 
         if (!is_admin()) {
             wp_enqueue_script('jquery');
-            wp_register_script('bootstrap', $this->mpqdir . 'assets/js/bootstrap.bundle.min.js', ['jquery'], $rlvhv . '.' . $this->versbuild, true);
-            wp_enqueue_script('bootstrap');
-            wp_register_script('mpq', $mpq_js, ['jquery', 'bootstrap'], $this->vers . '.' . $this->versbuild, true);
+            wp_register_script('mpq', $this->min_path_js, ['jquery'], $this->vers . '.' . $this->versbuild, true);
             wp_enqueue_script('mpq');
             $this->mpq_inline_script();
         }
@@ -298,22 +296,9 @@ class mpQuestions
     public function enqueueStyles()
     {
 
-        $mpq_css = $this->mpqdir . 'assets/css/grid5x5.css';
-
         if (!is_admin()) {
-            wp_register_style('bootstrap', $this->mpqdir . 'assets/css/bootstrap.min.css', [], '4.4.1', 'all');
-            wp_enqueue_style('bootstrap');
-
-            wp_register_style('open-iconic-bootstrap', $this->mpqdir . 'assets/css/open-iconic-bootstrap.css', ['bootstrap'], '1.1.1', 'all');
-            wp_enqueue_style('open-iconic-bootstrap');
-
-            wp_register_style('firework', $this->mpqdir . 'assets/css/firework.css', [], '1.1.1', 'all');
-            wp_enqueue_style('firework');
-
-            $dependon_css = apply_filters($this->plugin_slug . '_dependon_css', ['bootstrap', 'open-iconic-bootstrap', 'firework']);
-
-            wp_register_style('grid5x5', $mpq_css, $dependon_css, $this->vers . '.' . $this->versbuild, 'all');
-            wp_enqueue_style('grid5x5');
+            wp_register_style('medijpratibai', $this->min_path_css, [], '1.0.0', 'all');
+            wp_enqueue_style('medijpratibai');
         }
     }
 
@@ -322,18 +307,13 @@ class mpQuestions
      */
     public function resourceHints($hints, $relation_type)
     {
-        $rlvhv = $this->vers;
 
-        $mpq_css = $this->mpqdir . 'assets/css/grid5x5.css';
-        $openiconic_bootstrap_css = $this->mpqdir . 'assets/css/open-iconic-bootstrap.css';
         switch ($relation_type) {
             case 'prerender':
-                $hints[] = $mpq_css;
-                $hints[] = $openiconic_bootstrap_css;
+                $hints[] = $this->min_path_css;
                 break;
             case 'prefetch':
-                $hints[] = $mpq_css;
-                $hints[] = $openiconic_bootstrap_css;
+                $hints[] = $this->min_path_css;
                 break;
         }
 

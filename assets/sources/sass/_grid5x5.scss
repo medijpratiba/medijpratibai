@@ -1,3 +1,4 @@
+/*! purgecss start ignore */
 html,
 body {
   max-width: 100%;
@@ -70,11 +71,13 @@ html > .page-template-tpl_5x5 {
 }
 
 .grid5x5-single .grid5x5-box {
+  /*
   transform: translate(-50%, -50%);
   -moz-transform: translate(-50%, 0);
-  /* Firefox */
+
   top: 50%;
   left: 50%;
+  */
   position: relative;
   height: 15vh;
   width: 10vw;
@@ -123,3 +126,4 @@ html > .page-template-tpl_5x5 {
     font-size: 1rem;
   }
 }
+/*! purgecss end ignore */

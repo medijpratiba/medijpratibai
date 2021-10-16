@@ -1,0 +1,10 @@
+/assets/sources/img/
+/assets/sources/js/*bootstrap*
+/assets/sources/sass/*_bootstrap*
+/node_modules/
+
+gulpfile.js
+package.json
+package-lock.json
+
+mpq.min-min.js
