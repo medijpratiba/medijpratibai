@@ -2,7 +2,7 @@
 
 /** 
  * Plugin Name: Medijpratiba.lv jautājumi
- * Version: 1.1.4
+ * Version: 1.1.5
  * Plugin URI: https://medijpratiba.lv/spele/
  * Description: Medijpratiba.lv spēles jautājumi
  * Text Domain: medijpratibalv
@@ -38,7 +38,7 @@ require_once __DIR__ . '/helpers.php';
 class mpQuestions
 {
 
-    var $vers = '1.1.4';
+    var $vers = '1.1.5';
     var $versbuild; // build version 
     var $plugin_slug, $label_singular, $label_plural;
     var $plugin_td; // text domain
